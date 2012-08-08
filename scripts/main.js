@@ -1,4 +1,12 @@
+
+// shim in the dojo objects expected by the ascii85 include
 dojox = {encoding: { ascii85: {}}};
+
+// Also shim in the PRNG required by the bCrypt constructor - fake it out since we don't need the PRNG.
+Clipperz = { Crypto: { PRNG: { 
+	defaultRandomGenerator: function(){}, 
+	isReadyToGenerateRandomValues: function(){ throw "PRNG not defined"; }
+} } };
 
 requirejs.config({
     shim: {
@@ -9,26 +17,17 @@ requirejs.config({
 
 require([ 'bCrypt', 'ascii85' ], function( ) {
 
-	function string2Bin(str) {
-		var result = [];
-		for (var i = 0; i < str.length; i++) {
-			result.push(str.charCodeAt(i));
-		}
-		return result;
-	}
-
-	function bin2String(array) {
-		return String.fromCharCode.apply(String, array);
-	}
-
-	// PRNG is required in bCrypt constructor - fake it out here since we don't need the PRNG.
-	Clipperz = { Crypto: { PRNG: { 
-		defaultRandomGenerator: function(){}, 
-		isReadyToGenerateRandomValues: function(){ throw "PRNG not defined"; }
-	} } };
+	var bcrypt = new bCrypt(),
+		string2Bin = function(str) {
+			var result = [];
+			for (var i = 0; i < str.length; i++) {
+				result.push(str.charCodeAt(i));
+			}
+			return result;
+		}, bin2String = function (array) {
+			return String.fromCharCode.apply(String, array);
+		};
 	
-	var bcrypt = new bCrypt();
-
 	/**
 	* 
 	* hex_hash and gp2_generate_hash are only used for generating the identity icons, we'll leave those alone
@@ -66,14 +65,16 @@ require([ 'bCrypt', 'ascii85' ], function( ) {
 	delete LenMax;
 	
 	window.gp2_generate_passwd = function( password, len ) {
-		$('#Output').css('background-image', "url('progress.png')");
-		$('#Output').css('background-repeat', 'no-repeat');
-		$('#Output').css('background-size', '0% 50px');
-		
 		// salt here is the password and domain concatenated
 		var domain = ( $('#Domain').val() ) ? gp2_process_uri( $('#Domain').val(), false ) : 'localhost',
-			salt = '$2a$' + '08' + '$' + hex_hash( domain + $('#Salt').val() ).substr( 0, 21 ) + '.',
+			iterations = '10',
+			salt = '$2a$' + iterations + '$' + hex_hash( domain + $('#Salt').val() ).substr( 0, 21 ) + '.',
+			$output = $('#Output'),
 			i = 0;
+
+		$output.css('background-image', "url('progress.png')")
+			.css('background-repeat', 'no-repeat')
+			.css('background-size', '0% 50px');
 			
 		bcrypt.hashpw( password, salt, function( result ) {
 			var j = 0;
@@ -92,10 +93,10 @@ require([ 'bCrypt', 'ascii85' ], function( ) {
 				j++;
 			}
 			
-			$('#Output').css('background-size', '100% 50px');
-			$('#Output').text( result );
+			$output.css('background-size', '100% 50px').text( result );
+			
 		}, function(){
-			$('#Output').css('background-size', i++ + '% 50px');
+			$output.css('background-size', i++ + '% 50px');
 		} );		
 		
 		return "Generating . . . ";
