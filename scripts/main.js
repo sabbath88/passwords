@@ -62,7 +62,8 @@ require([ 'bCrypt', 'ascii85' ], function( ) {
 		$('#Output').css('background-size', '0% 50px');
 		
 		// salt here is the password and domain concatenated
-		var salt = '$2a$' + '12' + '$' + hex_hash( $('#Passwd').val() + $('#Salt').val() ).substr( 0, 21 ) + '.',
+		var domain = ( $('#Domain').val() ) ? gp2_process_uri( $('#Domain').val(), false ) : 'localhost',
+			salt = '$2a$' + '12' + '$' + hex_hash( domain + $('#Salt').val() ).substr( 0, 21 ) + '.',
 			i = 0;
 		bcrypt.hashpw( password, salt, function( result ) {
 			
