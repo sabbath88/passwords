@@ -9,6 +9,7 @@
 */
 
 function gp2_generate_passwd(Passwd,Len) {
+
 	var i=0;
 	while(i<10||!(gp2_check_passwd(Passwd.substring(0,Len)))) {
 		Passwd=b64_hash(Passwd);
