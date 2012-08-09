@@ -1,0 +1,8 @@
+.ui-widget { font-size: 1.1em; }
+.ui-widget-header { border: 1px solid #e78f08; background: #f6a828 url(progress.png) 50% 50% repeat-x; color: #ffffff; font-weight: bold; }
+
+#Output { margin: 0; padding: 0; height: 26px }
+#Cost {width: 40px}
+ 
+.ui-progressbar { overflow: hidden; }
+.ui-progressbar .ui-progressbar-value {margin: -1px; padding-top: 2px; height:100%;  }

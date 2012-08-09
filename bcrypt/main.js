@@ -15,7 +15,7 @@ requirejs.config({
     }
 });
 
-require([ 'bCrypt', 'ascii85' ], function( ) {
+require([ 'jquery-ui-1.8.22.custom.min', 'bCrypt', 'ascii85' ], function( ) {
 
 	var bcrypt = new bCrypt(),
 		string2Bin = function(str) {
@@ -37,12 +37,17 @@ require([ 'bCrypt', 'ascii85' ], function( ) {
 
 	// clear the background image on the same events that clear the password text
 	$(document).ready(function() {
+		var $output = $('#Output');
+	
 		$('input').on('keydown change', function (event) {
 			var key=event.which;
 			if(event.type=='change'||key==8||key==32||(key>45&&key<91)||(key>95&&key<112)||(key>185&&key<223)) {
-				$('#Output').css('background-image', "none");
+				$output.progressbar( 'destroy' );
 			} 
-		});	
+		});
+		
+		$('#MethodField').hide().after('<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>');
+
 	});
 	
 	// removed rule that first character must be lower-case letter
@@ -72,10 +77,12 @@ require([ 'bCrypt', 'ascii85' ], function( ) {
 			$output = $('#Output'),
 			i = 0;
 
-		$output.css('background-image', "url('progress.png')")
-			.css('background-repeat', 'no-repeat')
-			.css('background-size', '0% 50px');
-			
+		// height is 28px on my screen because of a 14px font (plus 2px top/bottom font-padding) plus 10px padding.
+		// I reproduce this with a 26px height plus 2px of top/bottom border
+		$output.html('').progressbar({
+			value: 0
+		});			
+		
 		bcrypt.hashpw( password, salt, function( result ) {
 			var j = 0;
 			
@@ -93,15 +100,13 @@ require([ 'bCrypt', 'ascii85' ], function( ) {
 				j++;
 			}
 			
-			$output.css('background-size', '100% 50px').text( result );
+			//the child div isn't part of the original html, it's appended by the progress bar plugin
+			$output.progressbar( "value" , 100 ).children('div').html( result );
 			
-		}, function(){
-			$output.css('background-size', i++ + '% 50px');
+		}, function( ){
+			$output.progressbar( "value" , i++ )
 		} );		
 		
-		return "Generating . . . ";
-		
 	};
-	
 	
 } );
