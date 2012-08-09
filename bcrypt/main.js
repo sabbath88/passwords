@@ -84,11 +84,12 @@ require([ 'jquery-ui-1.8.22.custom.min', 'bCrypt', 'ascii85' ], function( ) {
 		});			
 		
 		bcrypt.hashpw( password, salt, function( result ) {
-			var j = 0;
-			
+			var j = 0,
+				key = result.slice( (result.length - 31) , result.length );
+
 			// get only the password hash (not the salt) from the result, 
 			// and then trim that down to the user-defined length
-			result = b64_hash( result.substr(-31) ).substring( 0, len );
+			result = b64_hash( key ).substring( 0, len );
 
 			// Tests to make sure that the password meets the qualifications
 			// I'm not entirely convinced this is a good idea.  
