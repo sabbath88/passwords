@@ -5,15 +5,16 @@ todo:
 	remove dependencies on logging/prng/etc.
 	publish code to github
 	test in IE8, other browsers, just for kicks - works in ie8, except for progess bar
+	fix progress bar for IE8
 	
 make strength configurable in advanced settings (hide other settings)
 make sure global functions are present before over-writing them
-fix progress bar for IE8
+
 add readme and todo for github
 
+publish to amazon cdn with private URL
 compile code with node
 save entire file to localstorage? embed scripts with base64?
-publish to amazon cdn with private URL
 
 v2: add scrypt support: https://github.com/cheongwy/node-scrypt-js/tree/master/lib
 
