@@ -15,39 +15,39 @@ requirejs.config({
     }
 });
 
-require([ 'jquery-ui-1.8.22.custom.min', 'bCrypt', 'ascii85' ], function( ) {
+require([ 'jquery-ui', 'bCrypt', 'ascii85' ], function( ) {
 
 	var bcrypt = new bCrypt(),
-		strToArray = function(str) {
-			var result = [];
-			for (var i = 0; i < str.length; i++) {
-				result.push(str.charCodeAt(i));
-			}
-			return result;
-		}, 
 		b85_hash = function ( s ) {
-			return dojox.encoding.ascii85.encode( strToArray ( b64_sha512( s ) ) );
+			// What we're doing is hashing the incoming string, 
+			// then splitting it into an array, 
+			// then applying charCodeAt to each element of the array, 
+			// and then passing that result back to ascii85.encode
+			return dojox.encoding.ascii85.encode( b64_sha512( s ).split("").map( function( val ) { return val.charCodeAt( 0 ); } ) );
 		},
+		// removed rule that first character must be lower-case letter
+		// added rule that password must contain at least one non-alphanumeric character (from ascii85)
+		validate_b85_password = function ( password ) {
+			return (
+				password.search(/[0-9]/) >= 0 && 
+				password.search(/[A-Z]/) >= 0 && 
+				password.search(/[a-z]/) >= 0 && 
+				password.search(/[\x21-\x2F\x3A-\x40\x5B-\x60]/) >= 0 
+				) ? true : false;
+		},	
 		validate_cost = function( cost ){
 			// floor should normalize to either a number or NaN, then mix/max it to between 4 an 31
 			// then left pad it with zeros - can assume that it will only have a length of 1 or 2
 			var default_cost = 10,
-				raw_cost = Math.floor( cost ),
-				valid_cost = isNaN( raw_cost ) ? default_cost : Math.min( 31, Math.max( 4, raw_cost ) ),
+				valid_cost = Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ),
 				padded_cost = "00".slice( 0, 2 - (valid_cost + "").length ) + valid_cost;
 				
 			return padded_cost;
 		
-		};
+		},
+		Source = false,
+		Origin = false;
 		
-	
-	/**
-	* 
-	* hex_hash and gp2_generate_hash are only used for generating the identity icons, we'll leave those alone
-	* b64_hash is used by gp2_generate_passwd and gp2_validate_length the max password length is undefined
-	*
-	*/
-
 	$(document).ready(function() {
 		var $output = $('#Output');
 		
@@ -60,46 +60,38 @@ require([ 'jquery-ui-1.8.22.custom.min', 'bCrypt', 'ascii85' ], function( ) {
 		});
 		
 		// add a new set of advanced settings for bcrypt
-		$('#MethodField').hide().after('<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>');
+		$( '#MethodField' ).hide().after( '<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>' );
 		
-		$('#Cost').on('change', function ( e ){
-			this.value = parseInt( validate_cost( this.value ), 10 );
-		});
+		// grab the cost from localstorage, and also validate the cost on change
+		$( '#Cost' )
+			.val( parseInt( validate_cost( $.jStorage.get( 'Cost', 10 ) ), 10 ) )
+			.on( 'change', function ( e ){
+				this.value = parseInt( validate_cost( this.value ), 10 );
+			});
+			
+		// listen for the bookmarklet (evoked from the domain of the target site)
+		$( window ).on( 'message', function( event ) {
+			Source = event.originalEvent.source;
+			Origin = event.originalEvent.origin;
+		});			
+		
+		// there's a problem here in that Len is both a form element id, and a global variable.  
+		// To avoid the issue, I grab the Len.val
+		window.gp2_validate_length = function ( n ) {
+			var default_length = parseInt( $('#Len').val(), 10 ) || 10; 
+			try { LenMax } catch(e) { LenMax = ( b85_hash( 'test' ) ).length; }
+			return ( parseInt( n, 10 ) ) ? Math.max( 4, Math.min( parseInt( n, 10 ), LenMax ) ) : default_length;
+		};		
 		
 	});
 	
-	// removed rule that first character must be lower-case letter
-	// added rule that password must contain at least one non-alphanumeric character (from ascii85)
-	window.gp2_check_passwd = function (Passwd) {
-		return (
-			Passwd.search(/[0-9]/) >= 0 && 
-			Passwd.search(/[A-Z]/) >= 0 && 
-			Passwd.search(/[a-z]/) >= 0 && 
-			Passwd.search(/[\x21-\x2F\x3A-\x40\x5B-\x60]/) >= 0 
-			) ? true : false;
-	};
-	
-	// the only reason we need to overwrite the b64_hash is because gp2_validate_length uses it. therefore:
-	// todo: instead of overwriting b64_hash with b85_hash:
-	//	add new "Method" to advanced setting for bcrypt+base85,
-	//  duckpunch gp2_validate_length to look for a b85_hash function, and use it if it exists
-	window.b64_hash = function( s ) {
-		return b85_hash( s );
-	};
-	
-	// reset the LenMax so that the next time gp2_validate_length is called it will use the new b64_hash to calculate it.
-	delete LenMax;
-	
 	window.gp2_generate_passwd = function( password, len ) {
-		// salt here is the password and domain concatenated
-		var application_salt = 'ed6abeb33d6191a6acdc7f55ea93e0e2',
-			raw_domain = $('#Domain').val(),
-			domain = ( raw_domain ) ? gp2_process_uri( raw_domain, false ) : 'localhost',
-			padded_cost = validate_cost( $('#Cost').val() ),
-			
-			// salt is made up of domain ("per-user" salt) + user supplied salt (optional) + application salt
-			salt = '$2a$' + padded_cost + '$' + hex_sha512( domain + $('#Salt').val() + application_salt ).substr( 0, 21 ) + '.',
-			
+		var padded_cost = validate_cost( $('#Cost').val() ),
+			//prepend + cost + delimiter
+			salt = '$2a$' + padded_cost + '$' 
+				// salt is made up of first 21 character of sha512 hash of (domain + user supplied salt + application salt)
+				+ hex_sha512( gp2_process_uri( $('#Domain').val() || 'localhost' ) + $('#Salt').val() + 'ed6abeb33d6191a6acdc7f55ea93e0e2' ).substr( 0, 21 ) + '.'
+			,
 			$output = $('#Output'),
 			i = 0;
 		
@@ -111,24 +103,28 @@ require([ 'jquery-ui-1.8.22.custom.min', 'bCrypt', 'ascii85' ], function( ) {
 		
 		bcrypt.hashpw( password, salt, function( result ) {
 			var j = 0,
-				key = result.slice( (result.length - 31) , result.length );
-
-			// get only the password hash (not the salt) from the result, 
-			// and then trim that down to the user-defined length
-			result = b85_hash( key ).substring( 0, len );
+				// bcrypt returns the original salt and cost, but we calc those, so we don't need to store them.  So we just throw them out.
+				// and then trim that down to the user-defined length
+				hashed = b85_hash( result.slice( ( result.length - 31 ) , result.length ) ).substring( 0, len );
 
 			// Tests to make sure that the password meets the qualifications
 			// I'm not entirely convinced this is a good idea.  
 			// On the one hand it decreases entropy.
 			// On the other hand, password attacks will tend to search in 
 			//   order of alpha only, then alpha+numeric then all three
-			while( !gp2_check_passwd( result ) ) {
-				result = b85_hash( result ).substring( 0, len );
+			while( !validate_b85_password( hashed ) ) {
+				hashed = b85_hash( hashed ).substring( 0, len );
 				j++;
 			}
 			
-			//add the result within the div appended by the progress bar plugin
-			$output.progressbar( "value" , 100 ).children('.ui-progressbar-value').html( result );
+			// add the hashed result within the div appended by the progress bar plugin
+			$output.progressbar( "value" , 100 ).children('.ui-progressbar-value').html( hashed );
+			
+			if( Source && Origin ) {
+				Source.postMessage( hashed, Origin );
+			}			
+			
+			$.jStorage.set( 'Cost', padded_cost );
 			
 		}, function( ){
 			$output.progressbar( "value" , i++ )

@@ -1,11 +1,10 @@
 todo:
-duckpunch validate length function instead of b64 hash function
-store cost in localstorage
-
-
+don't change password destination until done generating
 add readme and todo for github
+publish to amazon cdn with private URL?
 
-publish to amazon cdn with private URL
+Start Using!
+
 compile code with node
 save entire file to localstorage? embed scripts with base64?
 
@@ -21,6 +20,8 @@ how hard to get from plaintext password and domain to master password?
 	
 done:
 
+duckpunch validate length function instead of b64 hash function
+store cost in localstorage
 progress meter (over results div)
 base85
 add test to generator thing
