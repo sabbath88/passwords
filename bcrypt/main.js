@@ -1,6 +1,6 @@
 
 // shim in the dojo objects expected by the ascii85 include
-dojox = {encoding: { ascii85: {}}};
+dojox = { encoding: { ascii85: {} } };
 
 // Also shim in the PRNG required by the bCrypt constructor - fake it out since we don't need the PRNG.
 Clipperz = { Crypto: { PRNG: { 
@@ -8,14 +8,14 @@ Clipperz = { Crypto: { PRNG: {
 	isReadyToGenerateRandomValues: function(){ throw "PRNG not defined"; }
 } } };
 
-requirejs.config({
+requirejs.config( {
     shim: {
 		'bCrypt': {},
 		'ascii85': {}
     }
-});
+} );
 
-require([ 'jquery-ui', 'bCrypt', 'ascii85' ], function( ) {
+require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 
 	var bcrypt = new bCrypt(),
 		b85_hash = function ( s ) {
@@ -62,6 +62,9 @@ require([ 'jquery-ui', 'bCrypt', 'ascii85' ], function( ) {
 		// add a new set of advanced settings for bcrypt
 		$( '#MethodField' ).hide().after( '<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>' );
 		
+		// show the identicon of just the salt on load so that you'll know whether to trust the bookmarklet
+		$('<canvas id="SaltCanvas" width="16" height="16"></canvas>').insertAfter( '#Canvas' ).identicon5( { hash: gp2_generate_hash( $('#Salt').val() ), size: 16 } );
+		
 		// grab the cost from localstorage, and also validate the cost on change
 		$( '#Cost' )
 			.val( parseInt( validate_cost( $.jStorage.get( 'Cost', 10 ) ), 10 ) )
@@ -70,9 +73,12 @@ require([ 'jquery-ui', 'bCrypt', 'ascii85' ], function( ) {
 			});
 			
 		// listen for the bookmarklet (evoked from the domain of the target site)
-		$( window ).on( 'message', function( event ) {
+		// so that I also have access to Source, Origin - they're in a closure on index.html
+		$( window ).unbind('message').on( 'message', function( event ) {
 			Source = event.originalEvent.source;
 			Origin = event.originalEvent.origin;
+			$('#Domain').val(gp2_process_uri(Origin)).trigger('change');
+			$('#Passwd').focus();
 		});			
 		
 		// there's a problem here in that Len is both a form element id, and a global variable.  
@@ -81,55 +87,57 @@ require([ 'jquery-ui', 'bCrypt', 'ascii85' ], function( ) {
 			var default_length = parseInt( $('#Len').val(), 10 ) || 10; 
 			try { LenMax } catch(e) { LenMax = ( b85_hash( 'test' ) ).length; }
 			return ( parseInt( n, 10 ) ) ? Math.max( 4, Math.min( parseInt( n, 10 ), LenMax ) ) : default_length;
+		};
+		
+		// overwrite both of the global window functions in the document.ready so that we can be sure that the 
+		// sgp.core.js ones have already been defined.
+		window.gp2_generate_passwd = function( password, len ) {
+			var padded_cost = validate_cost( $('#Cost').val() ),
+				//prepend + cost + delimiter
+				salt = '$2a$' + padded_cost + '$' 
+					// salt is made up of first 21 character of sha512 hash of (domain + user supplied salt + application salt)
+					+ hex_sha512( gp2_process_uri( $('#Domain').val() || 'localhost' ) + $('#Salt').val() + 'ed6abeb33d6191a6acdc7f55ea93e0e2' ).substr( 0, 21 ) + '.'
+				,
+				$output = $('#Output'),
+				i = 0;
+			
+			// height is 28px on my screen because of a 14px font (plus 2px top/bottom font-padding) plus 10px padding.
+			// I reproduce this with a 26px height plus 2px of top/bottom border
+			$output.html('').progressbar({
+				value: 0
+			});			
+			
+			bcrypt.hashpw( password, salt, function( result ) {
+				var j = 0,
+					// bcrypt returns the original salt and cost, but we calc those, so we don't need to store them.  So we just throw them out.
+					// and then trim that down to the user-defined length
+					hashed = b85_hash( result.slice( ( result.length - 31 ) , result.length ) ).substring( 0, len );
+
+				// Tests to make sure that the password meets the qualifications
+				// I'm not entirely convinced this is a good idea.  
+				// On the one hand it decreases entropy.
+				// On the other hand, password attacks will tend to search in 
+				//   order of alpha only, then alpha+numeric then all three
+				while( !validate_b85_password( hashed ) ) {
+					hashed = b85_hash( hashed ).substring( 0, len );
+					j++;
+				}
+				
+				// add the hashed result within the div appended by the progress bar plugin
+				$output.progressbar( "value" , 100 ).children('.ui-progressbar-value').html( hashed );
+				
+				if( Source && Origin ) {
+					Source.postMessage( hashed, Origin );
+				}			
+				
+				$.jStorage.set( 'Cost', padded_cost );
+				
+			}, function( ){
+				$output.progressbar( "value" , i++ )
+			} );		
+			
 		};		
 		
-	});
-	
-	window.gp2_generate_passwd = function( password, len ) {
-		var padded_cost = validate_cost( $('#Cost').val() ),
-			//prepend + cost + delimiter
-			salt = '$2a$' + padded_cost + '$' 
-				// salt is made up of first 21 character of sha512 hash of (domain + user supplied salt + application salt)
-				+ hex_sha512( gp2_process_uri( $('#Domain').val() || 'localhost' ) + $('#Salt').val() + 'ed6abeb33d6191a6acdc7f55ea93e0e2' ).substr( 0, 21 ) + '.'
-			,
-			$output = $('#Output'),
-			i = 0;
-		
-		// height is 28px on my screen because of a 14px font (plus 2px top/bottom font-padding) plus 10px padding.
-		// I reproduce this with a 26px height plus 2px of top/bottom border
-		$output.html('').progressbar({
-			value: 0
-		});			
-		
-		bcrypt.hashpw( password, salt, function( result ) {
-			var j = 0,
-				// bcrypt returns the original salt and cost, but we calc those, so we don't need to store them.  So we just throw them out.
-				// and then trim that down to the user-defined length
-				hashed = b85_hash( result.slice( ( result.length - 31 ) , result.length ) ).substring( 0, len );
-
-			// Tests to make sure that the password meets the qualifications
-			// I'm not entirely convinced this is a good idea.  
-			// On the one hand it decreases entropy.
-			// On the other hand, password attacks will tend to search in 
-			//   order of alpha only, then alpha+numeric then all three
-			while( !validate_b85_password( hashed ) ) {
-				hashed = b85_hash( hashed ).substring( 0, len );
-				j++;
-			}
-			
-			// add the hashed result within the div appended by the progress bar plugin
-			$output.progressbar( "value" , 100 ).children('.ui-progressbar-value').html( hashed );
-			
-			if( Source && Origin ) {
-				Source.postMessage( hashed, Origin );
-			}			
-			
-			$.jStorage.set( 'Cost', padded_cost );
-			
-		}, function( ){
-			$output.progressbar( "value" , i++ )
-		} );		
-		
-	};
+	} );
 	
 } );
