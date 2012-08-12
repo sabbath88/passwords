@@ -44,8 +44,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		// floor should normalize to either a number or NaN, then mix/max it to between 4 an 31
 		// then left pad it with zeros - can assume that it will only have a length of 1 or 2
 		var default_cost = 10,
-			valid_cost = Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ),
-			padded_cost = "00".slice( 0, 2 - (valid_cost + "").length ) + valid_cost;
+			padded_cost = ("0" + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice(-2);
 			
 		return padded_cost;
 	}	
@@ -94,6 +93,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		// overwrite both of the global window functions in the document.ready so that we can be sure that the 
 		// sgp.core.js ones have already been defined.
 		window.gp2_generate_passwd = function( password, len ) {
+		
 			var padded_cost = validate_cost( $('#Cost').val() ),
 				//prepend + cost + delimiter
 				salt = '$2a$' + padded_cost + '$' 
@@ -126,7 +126,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 				}
 				
 				// add the hashed result within the div appended by the progress bar plugin
-				$output.progressbar( "value" , 100 ).children('.ui-progressbar-value').html( hashed );
+				$output.progressbar( "value" , 100 ).children('.ui-progressbar-value').text( hashed );
 				
 				if( Source && Origin ) {
 					Source.postMessage( hashed, Origin );
