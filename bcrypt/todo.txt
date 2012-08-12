@@ -1,6 +1,5 @@
 todo:
 fix .map() for IE8
-don't change password destination until done generating
 add readme and todo for github
 publish to amazon cdn with private URL?
 
@@ -21,6 +20,7 @@ how hard to get from plaintext password and domain to master password?
 	
 done:
 
+don't change password destination until done generating
 duckpunch validate length function instead of b64 hash function
 store cost in localstorage
 progress meter (over results div)

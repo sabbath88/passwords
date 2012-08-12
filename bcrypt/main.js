@@ -18,35 +18,37 @@ requirejs.config( {
 require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 
 	var bcrypt = new bCrypt(),
-		b85_hash = function ( s ) {
-			// What we're doing is hashing the incoming string, 
-			// then splitting it into an array, 
-			// then applying charCodeAt to each element of the array, 
-			// and then passing that result back to ascii85.encode
-			return dojox.encoding.ascii85.encode( b64_sha512( s ).split("").map( function( val ) { return val.charCodeAt( 0 ); } ) );
-		},
-		// removed rule that first character must be lower-case letter
-		// added rule that password must contain at least one non-alphanumeric character (from ascii85)
-		validate_b85_password = function ( password ) {
-			return (
-				password.search(/[0-9]/) >= 0 && 
-				password.search(/[A-Z]/) >= 0 && 
-				password.search(/[a-z]/) >= 0 && 
-				password.search(/[\x21-\x2F\x3A-\x40\x5B-\x60]/) >= 0 
-				) ? true : false;
-		},	
-		validate_cost = function( cost ){
-			// floor should normalize to either a number or NaN, then mix/max it to between 4 an 31
-			// then left pad it with zeros - can assume that it will only have a length of 1 or 2
-			var default_cost = 10,
-				valid_cost = Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ),
-				padded_cost = "00".slice( 0, 2 - (valid_cost + "").length ) + valid_cost;
-				
-			return padded_cost;
-		
-		},
 		Source = false,
 		Origin = false;
+		
+	function b85_hash ( s ) {
+		// What we're doing is hashing the incoming string, 
+		// then splitting it into an array, 
+		// then applying charCodeAt to each element of the array, 
+		// and then passing that result back to ascii85.encode
+		return dojox.encoding.ascii85.encode( b64_sha512( s ).split("").map( function( val ) { return val.charCodeAt( 0 ); } ) );
+	}
+	
+	// removed rule that first character must be lower-case letter
+	// added rule that password must contain at least one non-alphanumeric character (from ascii85)
+	function validate_b85_password ( password ) {
+		return (
+			password.search(/[0-9]/) >= 0 && 
+			password.search(/[A-Z]/) >= 0 && 
+			password.search(/[a-z]/) >= 0 && 
+			password.search(/[\x21-\x2F\x3A-\x40\x5B-\x60]/) >= 0 
+			) ? true : false;
+	}
+	
+	function validate_cost ( cost ) {
+		// floor should normalize to either a number or NaN, then mix/max it to between 4 an 31
+		// then left pad it with zeros - can assume that it will only have a length of 1 or 2
+		var default_cost = 10,
+			valid_cost = Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ),
+			padded_cost = "00".slice( 0, 2 - (valid_cost + "").length ) + valid_cost;
+			
+		return padded_cost;
+	}	
 		
 	$(document).ready(function() {
 		var $output = $('#Output');
