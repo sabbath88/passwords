@@ -26,7 +26,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		// then splitting it into an array, 
 		// then applying charCodeAt to each element of the array, 
 		// and then passing that result back to ascii85.encode
-		return dojox.encoding.ascii85.encode( b64_sha512( s ).split("").map( function( val ) { return val.charCodeAt( 0 ); } ) );
+		return dojox.encoding.ascii85.encode( $.map( b64_sha512( s ).split(""), function( val ) { return val.charCodeAt( 0 ); } ) );
 	}
 	
 	// removed rule that first character must be lower-case letter
@@ -85,8 +85,8 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		// there's a problem here in that Len is both a form element id, and a global variable.  
 		// To avoid the issue, I grab the Len.val
 		window.gp2_validate_length = function ( n ) {
-			var default_length = parseInt( $('#Len').val(), 10 ) || 10; 
-			try { LenMax } catch(e) { LenMax = ( b85_hash( 'test' ) ).length; }
+			var default_length = parseInt( $('#Len').val(), 10 ) || 10,
+				LenMax = ( b85_hash( 'test' ) ).length;
 			return ( parseInt( n, 10 ) ) ? Math.max( 4, Math.min( parseInt( n, 10 ), LenMax ) ) : default_length;
 		};
 		
