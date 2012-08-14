@@ -5,7 +5,7 @@ dojox = { encoding: { ascii85: {} } };
 // Also shim in the PRNG required by the bCrypt constructor - fake it out since we don't need the PRNG.
 Clipperz = { Crypto: { PRNG: { 
 	defaultRandomGenerator: function(){}, 
-	isReadyToGenerateRandomValues: function(){ throw "PRNG not defined"; }
+	isReadyToGenerateRandomValues: function(){ throw 'PRNG not defined'; }
 } } };
 
 requirejs.config( {
@@ -26,7 +26,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		// then splitting it into an array, 
 		// then applying charCodeAt to each element of the array, 
 		// and then passing that result back to ascii85.encode
-		return dojox.encoding.ascii85.encode( $.map( b64_sha512( s ).split(""), function( val ) { return val.charCodeAt( 0 ); } ) );
+		return dojox.encoding.ascii85.encode( $.map( b64_sha512( s ).split(''), function( val ) { return val.charCodeAt( 0 ); } ) );
 	}
 	
 	// removed rule that first character must be lower-case letter
@@ -41,10 +41,10 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 	}
 	
 	function validate_cost ( cost ) {
-		// floor should normalize to either a number or NaN, then mix/max it to between 4 an 31
+		// floor should normalize to either a number or NaN, then min/max it to between 4 an 31
 		// then left pad it with zeros - can assume that it will only have a length of 1 or 2
 		var default_cost = 10,
-			padded_cost = ("0" + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice(-2);
+			padded_cost = ('0' + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice(-2);
 			
 		return padded_cost;
 	}	
@@ -100,7 +100,6 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 					// salt is made up of first 21 character of sha512 hash of (domain + user supplied salt + application salt)
 					+ hex_sha512( gp2_process_uri( $('#Domain').val() || 'localhost' ) + $('#Salt').val() + 'ed6abeb33d6191a6acdc7f55ea93e0e2' ).substr( 0, 21 ) + '.'
 				,
-				$output = $('#Output'),
 				i = 0;
 			
 			// height is 28px on my screen because of a 14px font (plus 2px top/bottom font-padding) plus 10px padding.
@@ -110,10 +109,9 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			});			
 			
 			bcrypt.hashpw( password, salt, function( result ) {
-				var j = 0,
-					// bcrypt returns the original salt and cost, but we calc those, so we don't need to store them.  So we just throw them out.
-					// and then trim that down to the user-defined length
-					hashed = b85_hash( result.slice( ( result.length - 31 ) , result.length ) ).substring( 0, len );
+				// bcrypt returns the original salt and cost, but we calc those, so we don't need to store them.  
+				// So we just throw them out, and then trim that down to the user-defined length
+				var hashed = b85_hash( result.slice( ( result.length - 31 ) , result.length ) ).substring( 0, len );
 
 				// Tests to make sure that the password meets the qualifications
 				// I'm not entirely convinced this is a good idea.  
@@ -122,11 +120,10 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 				//   order of alpha only, then alpha+numeric then all three
 				while( !validate_b85_password( hashed ) ) {
 					hashed = b85_hash( hashed ).substring( 0, len );
-					j++;
 				}
 				
 				// add the hashed result within the div appended by the progress bar plugin
-				$output.progressbar( "value" , 100 ).children('.ui-progressbar-value').text( hashed );
+				$output.progressbar( 'value' , 100 ).children( '.ui-progressbar-value' ).text( hashed );
 				
 				if( Source && Origin ) {
 					Source.postMessage( hashed, Origin );
@@ -135,7 +132,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 				$.jStorage.set( 'Cost', padded_cost );
 				
 			}, function( ){
-				$output.progressbar( "value" , i++ )
+				$output.progressbar( 'value' , i++ );
 			} );		
 			
 		};		

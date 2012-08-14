@@ -1,5 +1,10 @@
 todo:
-fix .map() for IE8
+fix identicon for IE8
+potentially add cross-domain communication for oldIE with one or combo of these techniques:
+	http://shouldersofgiants.co.uk/Blog/post/2009/08/17/Another-Cross-Domain-iFrame-Communication-Technique.aspx
+	http://benalman.com/projects/jquery-postmessage-plugin/
+	http://easyxdm.net/wp/
+	
 add readme and todo for github
 publish to amazon cdn with private URL?
 
@@ -20,6 +25,7 @@ how hard to get from plaintext password and domain to master password?
 	
 done:
 
+fix .map() for IE8
 don't change password destination until done generating
 duckpunch validate length function instead of b64 hash function
 store cost in localstorage
