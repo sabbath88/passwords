@@ -71,15 +71,14 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			.val( parseInt( validate_cost( $.jStorage.get( 'Cost', 10 ) ), 10 ) )
 			.on( 'change', function ( e ){
 				this.value = parseInt( validate_cost( this.value ), 10 );
+				$.jStorage.set( 'Cost', this.value );
 			});
 			
 		// listen for the bookmarklet (evoked from the domain of the target site)
 		// so that I also have access to Source, Origin - they're in a closure on index.html
-		$( window ).unbind('message').on( 'message', function( event ) {
+		$( window ).on( 'message', function( event ) {
 			Source = event.originalEvent.source;
 			Origin = event.originalEvent.origin;
-			$('#Domain').val(gp2_process_uri(Origin)).trigger('change');
-			$('#Passwd').focus();
 		});			
 		
 		// there's a problem here in that Len is both a form element id, and a global variable.  
@@ -94,9 +93,8 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		// sgp.core.js ones have already been defined.
 		window.gp2_generate_passwd = function( password, len ) {
 		
-			var padded_cost = validate_cost( $('#Cost').val() ),
-				//prepend + cost + delimiter
-				salt = '$2a$' + padded_cost + '$' 
+			// prepend + cost + delimiter + salt
+			var salt = '$2a$' + validate_cost( $('#Cost').val() ) + '$' 
 					// salt is made up of first 21 character of sha512 hash of (domain + user supplied salt + application salt)
 					+ hex_sha512( gp2_process_uri( $('#Domain').val() || 'localhost' ) + $('#Salt').val() + 'ed6abeb33d6191a6acdc7f55ea93e0e2' ).substr( 0, 21 ) + '.'
 				,
@@ -128,8 +126,6 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 				if( Source && Origin ) {
 					Source.postMessage( hashed, Origin );
 				}			
-				
-				$.jStorage.set( 'Cost', padded_cost );
 				
 			}, function( ){
 				$output.progressbar( 'value' , i++ );
