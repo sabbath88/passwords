@@ -18,8 +18,8 @@ requirejs.config( {
 require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 
 	var bcrypt = new bCrypt(),
-		Source = false,
-		Origin = false;
+		Source, 
+		Origin;
 		
 	function b85_hash ( s ) {
 		// What we're doing is hashing the incoming string, 
@@ -89,8 +89,8 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			return ( parseInt( n, 10 ) ) ? Math.max( 4, Math.min( parseInt( n, 10 ), LenMax ) ) : default_length;
 		};
 		
-		// overwrite both of the global window functions in the document.ready so that we can be sure that the 
-		// sgp.core.js ones have already been defined.
+		// overwrite both of the global window functions in the document.ready 
+		// ensuring that the sgp.core.js ones have already been defined.
 		window.gp2_generate_passwd = function( password, len ) {
 		
 			// prepend + cost + delimiter + salt
@@ -112,10 +112,6 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 				var hashed = b85_hash( result.slice( ( result.length - 31 ) , result.length ) ).substring( 0, len );
 
 				// Tests to make sure that the password meets the qualifications
-				// I'm not entirely convinced this is a good idea.  
-				// On the one hand it decreases entropy.
-				// On the other hand, password attacks will tend to search in 
-				//   order of alpha only, then alpha+numeric then all three
 				while( !validate_b85_password( hashed ) ) {
 					hashed = b85_hash( hashed ).substring( 0, len );
 				}
