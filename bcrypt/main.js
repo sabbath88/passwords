@@ -44,7 +44,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		// floor should normalize to either a number or NaN, then min/max it to between 4 an 31
 		// then left pad it with zeros - can assume that it will only have a length of 1 or 2
 		var default_cost = 10,
-			padded_cost = ('0' + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice(-2);
+			padded_cost = ( '0' + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice( -2 );
 			
 		return padded_cost;
 	}	
@@ -61,7 +61,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		});
 		
 		// add a new set of advanced settings for bcrypt
-		$( '#MethodField' ).hide().after( '<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>' );
+		$( '#MethodField' ).after( '<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>' );
 		
 		// show the identicon of just the salt on load so that you'll know whether to trust the bookmarklet
 		$('<canvas id="SaltCanvas" width="16" height="16"></canvas>').insertAfter( '#Canvas' ).identicon5( { hash: gp2_generate_hash( $('#Salt').val() ), size: 16 } );

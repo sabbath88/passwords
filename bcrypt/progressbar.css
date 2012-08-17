@@ -1,6 +1,7 @@
 #Output { margin: 0; padding: 0; height: 26px }
 #Cost { width: 40px }
 #SaltCanvas { float: left }
+#MethodField { display: none }
 h1 { margin-left: 20px }
 
 .ui-widget { font-size: 1.1em; }
