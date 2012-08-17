@@ -1,5 +1,12 @@
-/* try to keep the Output height the same, even when used as a progress meter */
-#Output { margin: 0; padding: 0; height: 26px }
+/* 
+	The normal Output height is 28px on my screen because of a 14px font (plus 2px top/bottom font-padding) plus 10px padding.
+	We don't want padding on the Output because it's used as a progress bar, so we just reset it to height of 28
+*/
+#Output { 
+	margin: 0; 
+	padding: 0; 
+	height: 28px;
+}
 
 #Cost { width: 40px }
 #SaltCanvas { float: left }
