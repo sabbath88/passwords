@@ -60,14 +60,31 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			} 
 		});
 		
-		// show the identicon of just the salt on load so that you'll know whether to trust the bookmarklet
-		$('<canvas id="SaltCanvas" width="16" height="16"></canvas>').insertAfter( '#Canvas' ).identicon5( { hash: gp2_generate_hash( $('#Salt').val() ), size: 16 } );
+		// instantiate a canvas for the salt identicon ( for validating the bookmarklet )
+		$('<canvas id="SaltCanvas" width="16" height="16"></canvas>').insertAfter( '#Canvas' );
 		
-		// then update that hash and the justorage whenever it's changed
+		// then update that hash and the jstorage whenever it's changed and also when the page is loaded
 		$('#Salt').on('change', function( e ) {
-			$('#SaltCanvas').identicon5( { hash: gp2_generate_hash( this.value ), size: 16 } );
+			update_identicon( this.value, $('#SaltCanvas') );
 			$.jStorage.set('Salt',this.value);
+		} ).trigger('change');
+		
+		// also update the password identicon when it's changed, rather than waiting for generate
+		$('#Passwd').on( 'change', function( e ) {
+			update_identicon( this.value, $('#Canvas') );
 		} );
+		
+		function update_identicon( value, $target ) {
+			if( value !== '') {
+				$target.identicon5( { hash: gp2_generate_hash( value ), size: 16 } );
+			} else {
+				$target[0].getContext('2d').clearRect(0, 0, 16, 16);
+			}		
+		}
+		
+		
+		// because we're using a salt identicon, we don't also need the word "Salt"
+		$('#SaltHUD').html('');
 		
 		// add a new set of advanced settings for bcrypt
 		$( '#MethodField' ).after( '<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>' );
