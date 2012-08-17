@@ -60,11 +60,17 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			} 
 		});
 		
-		// add a new set of advanced settings for bcrypt
-		$( '#MethodField' ).after( '<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>' );
-		
 		// show the identicon of just the salt on load so that you'll know whether to trust the bookmarklet
 		$('<canvas id="SaltCanvas" width="16" height="16"></canvas>').insertAfter( '#Canvas' ).identicon5( { hash: gp2_generate_hash( $('#Salt').val() ), size: 16 } );
+		
+		// then update that hash and the justorage whenever it's changed
+		$('#Salt').on('change', function( e ) {
+			$('#SaltCanvas').identicon5( { hash: gp2_generate_hash( this.value ), size: 16 } );
+			$.jStorage.set('Salt',this.value);
+		} );
+		
+		// add a new set of advanced settings for bcrypt
+		$( '#MethodField' ).after( '<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>' );
 		
 		// grab the cost from localstorage, and also validate the cost on change
 		$( '#Cost' )
@@ -81,12 +87,10 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			Origin = event.originalEvent.origin;
 		});			
 		
-		// there's a problem here in that Len is both a form element id, and a global variable.  
-		// To avoid the issue, I grab the Len.val
+		// validate against b85 hash rather than b64 hash - should result in length of 108
 		window.gp2_validate_length = function ( n ) {
-			var default_length = parseInt( $('#Len').val(), 10 ) || 10,
-				LenMax = ( b85_hash( 'test' ) ).length;
-			return ( parseInt( n, 10 ) ) ? Math.max( 4, Math.min( parseInt( n, 10 ), LenMax ) ) : default_length;
+			var default_length = parseInt( $('#Len').val(), 10 ) || 10;
+			return parseInt( n, 10 ) ? Math.max( 4, Math.min( parseInt( n, 10 ), b85_hash( 'test' ).length ) ) : default_length;
 		};
 		
 		// overwrite both of the global window functions in the document.ready 
