@@ -43,14 +43,14 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 	function validate_cost ( cost ) {
 		// floor should normalize to either a number or NaN, then min/max it to between 4 an 31
 		// then left pad it with zeros - can assume that it will only have a length of 1 or 2
-		var default_cost = 10,
-			padded_cost = ( '0' + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice( -2 );
-			
-		return padded_cost;
+		var default_cost = 10;
+		return ( '0' + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice( -2 );
 	}	
 		
 	$(document).ready(function() {
-		var $output = $('#Output');
+		var $output = $('#Output'),
+			$salt = $('#Salt'),
+			$canvas = $('#Canvas'), $cost;
 		
 		// clear the background image on the same events that clear the password text
 		$('input').on('keydown change', function (event) {
@@ -61,17 +61,17 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		});
 		
 		// instantiate a canvas for the salt identicon ( for validating the bookmarklet )
-		$('<canvas id="SaltCanvas" width="16" height="16"></canvas>').insertAfter( '#Canvas' );
+		$('<canvas id="SaltCanvas" width="16" height="16"></canvas>').insertAfter( $canvas );
 		
 		// then update that hash and the jstorage whenever it's changed and also when the page is loaded
-		$('#Salt').on('change', function( e ) {
+		$salt.on('change', function( e ) {
 			update_identicon( this.value, $('#SaltCanvas') );
 			$.jStorage.set('Salt',this.value);
 		} ).trigger('change');
 		
 		// also update the password identicon when it's changed, rather than waiting for generate
 		$('#Passwd').on( 'change', function( e ) {
-			update_identicon( this.value, $('#Canvas') );
+			update_identicon( this.value + $salt.val() , $canvas );
 		} );
 		
 		function update_identicon( value, $target ) {
@@ -82,7 +82,6 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			}		
 		}
 		
-		
 		// because we're using a salt identicon, we don't also need the word "Salt"
 		$('#SaltHUD').html('');
 		
@@ -90,7 +89,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		$( '#MethodField' ).after( '<fieldset id="BcryptField"><label for="Cost">Cost</label><input id="Cost" type="text" placeholder="Cost"></fieldset>' );
 		
 		// grab the cost from localstorage, and also validate the cost on change
-		$( '#Cost' )
+		$cost = $('#Cost')
 			.val( parseInt( validate_cost( $.jStorage.get( 'Cost', 10 ) ), 10 ) )
 			.on( 'change', function ( e ){
 				this.value = parseInt( validate_cost( this.value ), 10 );
@@ -115,9 +114,9 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		window.gp2_generate_passwd = function( password, len ) {
 		
 			// prepend + cost + delimiter + salt
-			var salt = '$2a$' + validate_cost( $('#Cost').val() ) + '$' 
+			var salt = '$2a$' + validate_cost( $cost.val() ) + '$' 
 					// salt is made up of first 21 character of sha512 hash of (domain + user supplied salt + application salt)
-					+ hex_sha512( gp2_process_uri( $('#Domain').val() || 'localhost' ) + $('#Salt').val() + 'ed6abeb33d6191a6acdc7f55ea93e0e2' ).substr( 0, 21 ) + '.'
+					+ hex_sha512( gp2_process_uri( $('#Domain').val() || 'localhost' ) + $salt.val() + 'ed6abeb33d6191a6acdc7f55ea93e0e2' ).substr( 0, 21 ) + '.'
 				,
 				i = 0;
 			
