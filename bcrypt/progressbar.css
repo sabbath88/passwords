@@ -1,3 +1,9 @@
+
+input { 
+	border: 1px solid lightgrey; /* fixes password border on Firefox */
+	margin: 0; /* fixes default margin in chrome */
+}
+
 /* 
 	The normal Output height is 28px on my screen because of a 14px font (plus 2px top/bottom font-padding) plus 10px padding.
 	We don't want padding on the Output because it's used as a progress bar, so we just reset it to height of 28
@@ -9,15 +15,27 @@
 }
 
 #Cost { width: 40px }
-#SaltCanvas { float: left }
+
+#SaltCanvas {
+	float: left;
+	padding-left: 2px;
+	padding-right: 5px;
+}
+
+/* Canvas is positioned absolutely from within the password fieldset, where main.js moved it */
+#Canvas {
+	float: none;
+	position: absolute;
+	left: 176px;
+	top: 4px;
+	background-color: white;
+	z-index: 9999;
+}
 
 /* hide the MethodField because it doesn't apply to bcrypt/base85 */
 #MethodField { display: none }
 
-/* make a little room for the salt identicon */
-h1 { margin-left: 20px }
-
-/* jqueryUI styles, slimmed down to only what SGP needs */
+/* jqueryUI styles, slimmed down to only what the progress meter needs */
 .ui-widget { font-size: 1.1em; }
 .ui-widget-header { 
 	border: 1px solid #e78f08; 

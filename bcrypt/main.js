@@ -61,8 +61,11 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			} 
 		});
 		
+		// move canvas to inside PasswdField fieldset, so that it can be positioned absolutely inside password box
+		$canvas.appendTo('#PasswdField');
+		
 		// Instantiate a canvas for the salt identicon ( for validating the bookmarklet )
-		$saltcanvas = $('<canvas id="SaltCanvas" width="16" height="16"></canvas>').insertAfter( $canvas );
+		$saltcanvas = $('<canvas id="SaltCanvas" width="16" height="16"></canvas>').prependTo( 'h1' );
 		
 		// Then update both the salt and password icons and the jstorage value
 		// whenever it's changed and also when the page is loaded
@@ -74,8 +77,8 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		
 		// Also update the password identicon when it's changed, rather than waiting for generate
 		$passwd.on( 'change', function( e ) {
-			update_identicon( this.value + $salt.val() , $canvas );
-		} );
+			update_identicon( ( this.value ) ? this.value + $salt.val() : '' , $canvas );
+		} ).trigger('change');
 		
 		function update_identicon( value, $target ) {
 			if( value !== '') {
