@@ -6,13 +6,14 @@ potentially add cross-domain communication for oldIE with one or combo of these 
 	http://easyxdm.net/wp/
 	
 add readme and todo for github
-publish to amazon cdn with private URL?
+publish to amazon or google cdn
 
 Start Using!
 
-compile code with node
-save entire file to localstorage? embed scripts with base64?
+Opera issues: 
+	jumps around in advanced mode, 
 
+compile code with node
 v2: add scrypt support: https://github.com/cheongwy/node-scrypt-js/tree/master/lib
 
 how hard to get from md5/sha1 hash of generated password to plaintext password?
@@ -25,6 +26,7 @@ how hard to get from plaintext password and domain to master password?
 	
 done:
 
+Opera Issue: doesn't remember Salt as localfile
 fix .map() for IE8
 don't change password destination until done generating
 duckpunch validate length function instead of b64 hash function
@@ -37,3 +39,5 @@ publish code to github
 test in IE8, other browsers, just for kicks - works in ie8, except for progess bar
 fix progress bar for IE8
 make strength configurable in advanced settings (hide other settings)
+save entire file to localstorage? embed scripts with base64? 
+	No. Doesn't help with bookmarklet trust issues, makes no sense to do on hosting domain.  Only point would be to offline the code, which is better accomplished with local hosting.

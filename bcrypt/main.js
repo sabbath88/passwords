@@ -15,48 +15,50 @@ requirejs.config( {
     }
 } );
 
-require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
+// entire require statement must be inside document.ready, for Opera sake
+$( document ).ready( function() {
 
-	var bcrypt = new bCrypt(),
-		Source, Origin;
-		
-	function b85_hash ( s ) {
-		// What we're doing is hashing the incoming string, 
-		// then splitting it into an array, 
-		// then applying charCodeAt to each element of the array, 
-		// and then passing that result back to ascii85.encode
-		return dojox.encoding.ascii85.encode( $.map( b64_sha512( s ).split(''), function( val ) { return val.charCodeAt( 0 ); } ) );
-	}
-	
-	// removed rule that first character must be lower-case letter
-	// added rule that password must contain at least one non-alphanumeric character (from ascii85)
-	function validate_b85_password ( password ) {
-		return (
-			password.search(/[0-9]/) >= 0 && 
-			password.search(/[A-Z]/) >= 0 && 
-			password.search(/[a-z]/) >= 0 && 
-			password.search(/[\x21-\x2F\x3A-\x40\x5B-\x60]/) >= 0 
-			) ? true : false;
-	}
-	
-	function validate_cost ( cost ) {
-		// floor should normalize to either a number or NaN, then min/max it to between 4 an 31
-		// then left pad it with zeros - can assume that it will only have a length of 1 or 2
-		var default_cost = 10;
-		return ( '0' + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice( -2 );
-	}	
-		
-	$(document).ready(function() {
-		var $output = $('#Output'),
+	require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
+
+		var bcrypt = new bCrypt(),
+			Source, Origin, // will be populated with postMessage
+			$output = $('#Output'),
 			$salt = $('#Salt'),
 			$passwd = $('#Passwd'),
 			$canvas = $('#Canvas'), 
-			$cost, $saltcanvas; // don't exist yet
+			$cost, $saltcanvas; // don't exist yet		
+			
+		function b85_hash ( s ) {
+			// What we're doing is hashing the incoming string, 
+			// then splitting it into an array, 
+			// then applying charCodeAt to each element of the array, 
+			// and then passing that result back to ascii85.encode
+			return dojox.encoding.ascii85.encode( $.map( b64_sha512( s ).split(''), function( val ) { return val.charCodeAt( 0 ); } ) );
+		}
+		
+		// removed rule that first character must be lower-case letter
+		// added rule that password must contain at least one non-alphanumeric character (from ascii85)
+		function validate_b85_password ( password ) {
+			return (
+				password.search(/[0-9]/) >= 0 && 
+				password.search(/[A-Z]/) >= 0 && 
+				password.search(/[a-z]/) >= 0 && 
+				password.search(/[\x21-\x2F\x3A-\x40\x5B-\x60]/) >= 0 
+				) ? true : false;
+		}
+		
+		function validate_cost ( cost ) {
+			// floor should normalize to either a number or NaN, then min/max it to between 4 an 31
+			// then left pad it with zeros - can assume that it will only have a length of 1 or 2
+			var default_cost = 10;
+			return ( '0' + Math.min( 31, Math.max( 4, Math.floor( cost ) || default_cost ) ) ).slice( -2 );
+		}	
 		
 		// Clear the background image on the same events that clear the password text
 		$('input').on('keydown change', function (event) {
 			var key=event.which;
-			if(event.type=='change'||key==8||key==32||(key>45&&key<91)||(key>95&&key<112)||(key>185&&key<223)) {
+			// more or less captures most ascii key presses - same if statement as from index.html
+			if( event.type == 'change' || key == 8 || key == 32 || ( key > 45 && key < 91 ) || ( key > 95 && key < 112 ) || ( key > 185 && key < 223 ) ) {
 				$output.progressbar( 'destroy' );
 			} 
 		});
@@ -67,18 +69,19 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 		// Instantiate a canvas for the salt identicon ( for validating the bookmarklet )
 		$saltcanvas = $('<canvas id="SaltCanvas" width="16" height="16"></canvas>').prependTo( 'h1' );
 		
-		// Then update both the salt and password icons and the jstorage value
-		// whenever it's changed and also when the page is loaded
-		$salt.on('change', function( e ) {
-			update_identicon( this.value, $saltcanvas );
-			$passwd.trigger( 'change' );
-			$.jStorage.set('Salt',this.value);
-		} ).trigger('change');
-		
 		// Also update the password identicon when it's changed, rather than waiting for generate
+		// Will be triggered on load by the $salt trigger
 		$passwd.on( 'change', function( e ) {
 			update_identicon( ( this.value ) ? this.value + $salt.val() : '' , $canvas );
-		} ).trigger('change');
+		} );
+
+		// Then update both the salt and password icons and the jstorage value
+		// whenever it's changed and also when the page is loaded
+		$salt.on( 'change', function( e ) {
+			update_identicon( this.value, $saltcanvas );
+			$passwd.trigger( 'change' );
+			$.jStorage.set( 'Salt', this.value );
+		} ).trigger( 'change' );
 		
 		function update_identicon( value, $target ) {
 			if( value !== '') {
@@ -102,8 +105,8 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 				$.jStorage.set( 'Cost', this.value );
 			});
 			
-		// Listen for the bookmarklet (evoked from the domain of the target site)
-		// so that I also have access to Source, Origin - they're in a closure on index.html
+		// Listen for the bookmarklet (evoked from sgp.js on the domain of the target site)
+		// enables me to have access to Source, Origin - they're in a closure on index.html
 		$( window ).on( 'message', function( event ) {
 			Source = event.originalEvent.source;
 			Origin = event.originalEvent.origin;
@@ -126,6 +129,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 				,
 				i = 0;
 			
+			// initialize the progressbar
 			$output.html('').progressbar({
 				value: 0
 			});			
@@ -144,6 +148,7 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 				$output.progressbar( 'value' , 100 ).children( '.ui-progressbar-value' ).text( hashed );
 				
 				if( Source && Origin ) {
+					// send password to the page
 					Source.postMessage( hashed, Origin );
 				}			
 				
@@ -152,11 +157,8 @@ require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 			} );
 
 			// Explicitly return undefined because things break if we return anything else.
-			// Could just not do a return, but this serves as a reminder.
+			// Could just not do a return implicitly returning undefined, but this serves as a reminder.
 			return undefined;
-			
 		};		
-		
 	} );
-	
 } );
