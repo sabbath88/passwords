@@ -15,9 +15,13 @@ Go to [ctrlq.org/passwords][1] to test a live version of the password generator.
 
 Just write the passphrase (case insensitive) in the input field and hit generate to get you your unique password for that particular site.
 
-## Mobile Version
+### Mobile Version
 
-The password generator uses [responsive design][2] and therefore works across all screens including mobile phones and tablets. All it requires is a web browser with JavaScript enabled. You can also download the tool for offline use.
+The password generator uses [responsive design][2] and therefore works across all screens including mobile phones and tablets. All it requires is a web browser with JavaScript enabled. 
+
+### Offline Version
+
+You can also download the password generator for offline use. Just extract the zip file and double-click index.html to launch program. For added security, you may [password-protect the folder][3] or place the folder inside Dropbox and [secure with 2-factor verification][4].
 
 ### Authors
 
@@ -38,3 +42,5 @@ Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 
 [1]: http://ctrlq.org/passwords/
 [2]: http://www.labnol.org/internet/responsive-web-design-faq/21361/
+[3]: http://www.labnol.org/software/password-protect-folders-files/14323/
+[4]: http://www.labnol.org/internet/secure-dropbox-account/25096/
