@@ -36,7 +36,7 @@ You can also download the password generator for offline use. Just extract the z
 #### License
 
 Copyright 2012 Digital Inspiration
-Licensed under the Apache License, 
+Licensed under the Apache License,
 Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 
 [1]: http://ctrlq.org/passwords/
