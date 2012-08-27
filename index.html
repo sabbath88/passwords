@@ -1,359 +1,112 @@
-﻿<!DOCTYPE html>
-<html>
-
-	<head>
-
-		<!-- http://mobile.supergenpass.com = https://d6gnhhjxs73le.cloudfront.net -->
-
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="format-detection" content="telephone=no">
-
-		<link rel="apple-touch-icon" href="sgp.png">
-
-		<link rel="alternate" lang="fr" hreflang="fr" title="En français" href="?fr">
-		<link rel="alternate" lang="es" hreflang="es" title="En español" href="?es">
-		<link rel="alternate" lang="de" hreflang="de" title="Auf Deutsch" href="?de">
-		<link rel="alternate" lang="pt-br" hreflang="pt-br" title="No português brasileiro" href="?pt-br">
-		<link rel="alternate" lang="zh-hk" hreflang="zh-hk" title="繁體中文" href="?zh-hk">
-		<link rel="alternate" lang="hu" hreflang="hu" title="Magyarul" href="?hu">
-
-		<style type="text/css">
-
-			body {
-				width:200px;
-				margin: 0;
-				padding: 10px;
-				background: #fff;
-				color: #000;
-				font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
-				font-size: 14px;
-			}
-
-			a {
-				color: #666;
-				background-color: #eee;
-				text-decoration: none;
-			}
-
-			a:hover {
-				color: #000;
-				background-color: #ddd;
-			}
-
-			h1 {
-				margin: 0;
-				padding: 0;
-				color: #666;
-				font-size: 14px;
-				font-weight: normal;
-			}
-
-			fieldset {
-				position: relative;
-				margin: 5px 0 10px 0;
-				padding: 0;
-				border: none;
-			}
-
-			input {
-				width: 188px;
-				padding: 3px;
-			}
-
-			label {
-				display: none;
-				position: absolute;
-				top: 5px;
-				left: 5px;
-				color: #aaa;
-				font-size: 12px;
-			}
-
-			noscript { color: #f33; }
-
-			#Canvas { float: right; }
-
-			#LenField {
-				float: left;
-				margin-top: 0;
-			}
-
-			#Len {
-				float: left;
-				width: 30px;
-				margin-right: 5px;
-			}
-
-			#Down, #Up {
-				display: inline-block;
-				margin: 3px 0;
-				padding: 0 6px;
-			}
-
-			#Down { border-right: solid 1px #ccc; }
-
-			#Generate {
-				float: right;
-				padding: 4px 12px;
-				font-size: 13px;
-				border: 1px solid #999;
-				border-width: 0 1px 1px 0;
-				-webkit-border-radius: 8px;
-				   -moz-border-radius: 8px;
-				        border-radius: 8px;
-			}
-
-			#Output, #Advanced {
-				clear: both;
-				padding: 5px;
-				color: #333;
-				-webkit-border-radius: 5px;
-				   -moz-border-radius: 5px;
-				        border-radius: 5px;
-			}
-
-			#Output {
-				margin: 5px 0;
-				background-color: #eee;
-				text-align: center;
-				letter-spacing: 0.05em;
-				word-wrap: break-word;
-			}
-
-			#Advanced {
-				display: none;
-				background: #ddd;
-			}
-
-			#SaltField { margin-top: 5px; }
-			#Salt { width: 175px; }
-
-			#MethodField { margin: 5px 0; }
-			#MethodField input { width: auto; }
-
-			#MethodField label {
-				display: inline;
-				position: relative;
-				top: 0; left: 0;
-				padding-right: 10px;
-				color: #333;
-			}
-
-			#SaltHUD, #SHA512HUD {
-				display: none;
-				padding-left: 5px;
-				color: #999;
-				font-size: 11px;
-			}
-
-		</style>
-		<link rel="stylesheet" type="text/css" href="bcrypt/progressbar.css" />
-		
-		
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-		<script type="text/javascript" src="js/jquery.jstorage.js"></script>
-		<script type="text/javascript" src="js/jquery.identicon5.js"></script>
-		
-		
-		<script type="text/javascript" src="js/sgp.hash.js"></script>
-		<script type="text/javascript" src="js/sgp.core.js"></script>
-		
-		<script data-main="bcrypt/main" src="bcrypt/require.js"></script>
-	
-	<title>SuperGenPass</title>
-
-	</head>
-
-	<body>
-
-		<canvas id="Canvas" width="16" height="16"></canvas>
-
-		<h1>
-			SGP3
-			<span id="SaltHUD">SALT</span>
-			<span id="SHA512HUD">SHA-512</span>
-		</h1>
-
-		<noscript>Requires JavaScript!</noscript>
-
-		<form action="#">
-
-			<fieldset id="PasswdField">
-				<label for="Passwd">Master password</label>
-				<input id="Passwd" type="password" placeholder="Master password">
-			</fieldset>
-
-			<fieldset id="DomainField">
-				<label for="Domain">Domain / URL</label>
-				<input id="Domain" type="text" placeholder="Domain / URL" autocorrect="off" autocapitalize="off">
-			</fieldset>
-
-			<fieldset id="LenField">
-				<input id="Len" type="text" value="10">
-				<a href="#" id="Down">−</a><a href="#" id="Up">+</a>
-			</fieldset>
-
-			<a href="#" id="Generate">Generate</a>
-
-			<fieldset id="Advanced">
-
-				<fieldset id="SaltField">
-					<label for="Salt">Salt</label>
-					<input id="Salt" type="password" placeholder="Salt">
-				</fieldset>
-
-				<fieldset id="MethodField">
-					<input id="MethodMD5" name="Method" type="radio" value="md5" checked="checked">
-					<label for="MethodMD5">MD5</label>
-					<input id="MethodSHA512" name="Method" type="radio" value="sha512">
-					<label for="MethodSHA512">SHA-512</label>
-				</fieldset>
-
-			</fieldset>
-
-		</form>
-
-		<div id="Output">&#160;</div>
-
-		<script type="text/javascript">
-
-			$(document).ready(function() {
-
-			//	Default values:
-				var Origin=false;
-				var Source=false;
-
-			//	Perform localization if requested.
-
-				var Lang=location.search.substring(1);
-
-				if(Lang) {
-
-					var Localizations=
-						[
-							['en',   ['Master password','Domain / URL','Generate']],
-							['es',   ['Contraseña maestra','Dominio / URL','Enviar']],
-							['fr',   ['Mot de passe principal','Domaine / URL','Soumettre']],
-							['de',   ['Master Passwort','Domain / URL','Abschicken']],
-							['pt-br',['Senha-mestra','Domínio / URL','Gerar']],
-							['zh-hk',['主密碼','域名 / URL','提交']],
-							['hu',   ['Mesterjelszó','Tartomány / Internetcím','OK']]
-						];
-
-					for(var i=0;i<Localizations.length;i++) {
-						if(Lang==Localizations[i][0]) {
-							$('#Passwd').attr('placeholder',Localizations[i][1][0]);
-							$('#Domain').attr('placeholder',Localizations[i][1][1]);
-							$('#PasswdLabel').text(Localizations[i][1][0]);
-							$('#DomainLabel').text(Localizations[i][1][1]);
-							$('#Generate').text(Localizations[i][1][2]);
-							break;
-						}
-					}
-
-				}
-
-			//	Show advanced pane if requested.
-				$('#Advanced').toggle(location.hash.substring(1).toLowerCase()=='advanced');
-
-			//	Toggle HUD for advanced options.
-
-				$('#Salt, input:radio[name=Method]').on('keyup change', function (event) {
-					$('#SaltHUD').toggle($('#Salt').val()!='');
-					$('#SHA512HUD').toggle($('#MethodSHA512').prop('checked'));
-				});
-
-			//	Retrieve configuration from local storage (jStorage) if available.
-				$('#Len').val(gp2_validate_length($.jStorage.get('Len',10)));
-				$('#Salt').val($.jStorage.get('Salt','')).trigger('change');
-				$('input:radio[value='+$.jStorage.get('Method','md5')+']').prop('checked',true);
-
-			//	Generate password.
-
-				$('#Generate').on('click', function (event) {
-
-				//	Get input.
-					var Passwd=$('#Passwd').val();
-					var Salt=$('#Salt').val();
-					var Domain=($('#Domain').val())?gp2_process_uri($('#Domain').val(),false):'localhost';
-					var Len=gp2_validate_length($('#Len').val());
-					Method=$('input:radio[name=Method]:checked').val();
-
-				//	Update form with validated input.
-					$('#Domain').val(Domain).trigger('change');
-					$('#Len').val(Len).trigger('change');
-
-					if(Passwd) {
-
-						$('#Canvas').identicon5({hash:gp2_generate_hash(Passwd+Salt),size:16});
-						Passwd=gp2_generate_passwd(Passwd+Salt+':'+Domain,Len);
-						$('#Output').text(Passwd);
-
-					//	Send generated password to bookmarklet.
-
-						if(Source&&Origin) {
-							Source.postMessage(Passwd,Origin);
-						}
-
-					//	Save configuration to local storage (jStorage) if available.
-						$.jStorage.set('Salt',Salt);
-						$.jStorage.set('Len',Len);
-						$.jStorage.set('Method',Method);
-
-					} else {
-						$('#Passwd').css('background-color','#ff9');
-					}
-
-					event.preventDefault();
-
-				});
-
-			//	Adjust password length.
-
-				$('#Up, #Down').on('click', function (event) {
-					Len=gp2_validate_length(gp2_validate_length($('#Len').val())+(($(this).attr('id')=='Up')?1:-1))
-					$('#Len').val(Len).trigger('change');
-					$.jStorage.set('Len',Len);
-					event.preventDefault();
-				});
-
-			//	Clear generated password when input changes.
-
-				$('input').on('keydown change', function (event) {
-					var key=event.which;
-					if(event.type=='change'||key==8||key==32||(key>45&&key<91)||(key>95&&key<112)||(key>185&&key<223)) {
-						$('#Output').text(String.fromCharCode(160));
-						$('#Passwd').css('background-color','#fff');
-					} else if(key==13) {
-						$(this).blur();
-						$('#Generate').trigger('click');
-						event.preventDefault();
-					}
-				});
-
-			//	Provide fake input placeholders if browser does not support them.
-
-				if(!('placeholder' in document.createElement('input'))) {
-					$('#Passwd, #Domain, #Salt').on('keyup change', function (event) { 
-						$('label[for='+$(this).attr('id')+']').toggle($(this).val()=='');
-					}).trigger('change');
-				}
-
-			//	Attach postMessage listener for bookmarklet.
-
-				$(window).on('message', function(event) {
-					Source=event.originalEvent.source;
-					Origin=event.originalEvent.origin;
-					$('#Domain').val(gp2_process_uri(Origin)).trigger('change');
-					$('#Passwd').focus();
-				});
-
-			});
-
-		</script>
-
-	</body>
+<!DOCTYPE html>
+<html lang="en">
+<!-
+
+
+                         bbbbbbbb                                                       
+lllllll                  b::::::b                                               lllllll 
+l:::::l                  b::::::b                                               l:::::l 
+l:::::l                  b::::::b                                               l:::::l 
+l:::::l                   b:::::b                                               l:::::l 
+ l::::l   aaaaaaaaaaaaa   b:::::bbbbbbbbb    nnnn  nnnnnnnn       ooooooooooo    l::::l 
+ l::::l   a::::::::::::a  b::::::::::::::bb  n:::nn::::::::nn   oo:::::::::::oo  l::::l 
+ l::::l   aaaaaaaaa:::::a b::::::::::::::::b n::::::::::::::nn o:::::::::::::::o l::::l 
+ l::::l            a::::a b:::::bbbbb:::::::bnn:::::::::::::::no:::::ooooo:::::o l::::l 
+ l::::l     aaaaaaa:::::a b:::::b    b::::::b  n:::::nnnn:::::no::::o     o::::o l::::l 
+ l::::l   aa::::::::::::a b:::::b     b:::::b  n::::n    n::::no::::o     o::::o l::::l 
+ l::::l  a::::aaaa::::::a b:::::b     b:::::b  n::::n    n::::no::::o     o::::o l::::l 
+ l::::l a::::a    a:::::a b:::::b     b:::::b  n::::n    n::::no::::o     o::::o l::::l 
+l::::::la::::a    a:::::a b:::::bbbbbb::::::b  n::::n    n::::no:::::ooooo:::::ol::::::l
+l::::::la:::::aaaa::::::a b::::::::::::::::b   n::::n    n::::no:::::::::::::::ol::::::l
+l::::::l a::::::::::aa:::ab:::::::::::::::b    n::::n    n::::n oo:::::::::::oo l::::::l
+llllllll  aaaaaaaaaa  aaaabbbbbbbbbbbbbbbb     nnnnnn    nnnnnn   ooooooooooo   llllllll
+                                                                                        
+visit us online at www.labnol.org
+
+
+->
+    
+    <head>
+        <meta charset="utf-8">
+        <title>Unique Passwords</title>
+        <meta
+        name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="author" content="Amit Agarwal - www.labnol.org">
+            <meta name="robots" content="noindex,follow">
+            <link href="js/passwords.css" rel="stylesheet">
+    </head>
+    
+    <body>
+        <div class="container">
+            <h2><a href="http://ctrlq.org/passwords/">Unique Passwords</a></h2>
+            <form class="form-vertical well">
+                <div class="control-group">
+                    <label class="control-label" for="inputUser">user name</label>
+                    <div class="controls">
+                        <input type="text" id="inputUser" placeholder="User name (usually an email address)"
+                        class="input-xlarge" autocorrect="off" spellcheck="false">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="inputDomain">domain name</label>
+                    <div class="controls">
+                        <input type="text" id="inputDomain" placeholder="Domain name (e.g., facebook)"
+                        class="input-xlarge" autocorrect="off" autocapitalize="off" spellcheck="false"
+                        style="margin: 0 auto;" data-provide="typeahead" data-items="4" data-source='["Amazon","Apple","CtrlQ","Disqus","DreamHost","Dribbble","Dropbox","EverNote","Facebook","FourSquare","GetPocket","Github","GoDaddy","Google","Hotmail","HundredZeros","Instapaper","Labnol","LinkedIn","MailChimp","PayPal","Quora","Reddit","Skype","SlideShare", "Stack Overflow","StumbleUpon","Tumblr","Tweetdeck","Twitter","Wikipedia","WordPress","Yahoo"]'>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="inputLength">password size</label>
+                    <div class="controls">
+                        <select id="inputLength" class="span2">
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                            <option>13</option>
+                            <option>14</option>
+                            <option selected>15</option>
+                            <option>16</option>
+                            <option>17</option>
+                            <option>18</option>
+                            <option>19</option>
+                            <option>20</option>
+                            <option>21</option>
+                            <option>22</option>
+                            <option>23</option>
+                            <option>24</option>
+                            <option>25</option>
+                            <option>26</option>
+                            <option>27</option>
+                            <option>28</option>
+                            <option>29</option>
+                            <option>30</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="inputPhrase">passphrase</label>
+                    <div class="controls">
+                        <textarea rows="3" placeholder="Do add special characters" id="inputPhrase"
+                        class="input-xlarge" autocorrect="off" spellcheck="false"></textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <a href="#" id="showPassword" class="btn btn-inverse">Show Password</a>
+                        <input type="reset" class="btn btn-inverse" value="Reset" name="reset">
+                    </div>
+                </div>
+                <div class="alert alert-info" id="inputPassword"></div>
+                <div id="Output"></div>
+            </form>
+        </div>
+         <p align="center"><small>This is a <a href="http://www.labnol.org/">Digital Inspiration</a> project maintained by <a href="http://twitter.com/labnol">Amit Agarwal</a>. <br />Please see <a href="https://github.com/labnol/Unique-Passwords">Github</a> for source code and credits.</small></p>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/bootstrap.js"></script>
+        <script src="js/scripts.js"></script>
+        <script data-main="js/main" src="js/require.js"></script>
+    </body>
 
 </html>

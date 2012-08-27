@@ -1,3 +1,154 @@
+                        $(document).ready(function() {
+
+                                $('#inputUser').val('').trigger('change');
+
+                                $('#showPassword').on('click', function (event) {
+
+                                        var phrase=clean($('#inputPhrase').val());
+
+                                        var User=$('#inputUser').val().replace(/\s/g, '').toLowerCase();
+                                        var Domain=$('#inputDomain').val().replace(/\s/g, '').toLowerCase();
+                                        var Len=$('#inputLength').val();
+                                        var info = $('#inputPassword');
+
+                                        $('#inputDomain').val(Domain).trigger('change');
+                                        $('#inputLength').val(Len).trigger('change');
+
+                                        if(!User) {
+                                                $('#inputUser').css('background-color','#ff9');
+                                                info.text("Please enter a user name").show();
+                                        } else if(!Domain) {
+                                                $('#inputDomain').css('background-color','#ff9');
+                                                info.text("Please enter a valid domain name (e.g., google)").show();
+                                        } else if(!phrase) {
+                                                $('#inputPhrase').css('background-color','#ff9');
+                                                info.text("Please enter your secret passphrase").show();
+                                        } else {
+                                                var hostPattern = /^([a-zA-Z0-9-]+)$/;
+                                                if(hostPattern.test(Domain)==false) {
+                                                  $('#inputDomain').css('background-color', '#FF9');
+                                                  info.text("Please enter a valid domain name but without using any prefixes or suffixes. For instance, enter google and not google.com or www.google.com or accounts.google.com").show();
+                                                 }
+                                                else
+                                                  gp2_generate_passwd(phrase+User+':'+Domain,Len);
+                                        }
+
+                                        event.preventDefault();
+
+                                });
+
+                                $('input[name=reset]').on('click', function (event) {
+                                      $('input').trigger('change');
+                                });
+
+                                $('select').on('change', function (event) {
+                                      $('input').trigger('change');
+                                });
+
+                                $('textarea').on('keyup', function (event) {
+                                      $('input').trigger('change');
+                                });
+
+
+                                $('input').on('keydown change', function (event) {
+                                        var key=event.which;
+                                        if(event.type=='change'||key==8||key==32||(key>45&&key<91)||(key>95&&key<112)||(key>185&&key<223)) {
+                                                $('#inputPassword').text("").hide();
+                                                $('#inputPhrase').css('background-color','#fff');
+                                                $('#inputUser').css('background-color','#fff');
+                                                $('#inputDomain').css('background-color','#fff');
+                                        } else if(key==13) {
+                                                $(this).blur();
+                                                $('#showPassword').trigger('click');
+                                                event.preventDefault();
+                                        }
+                                });
+
+                        });
+
+function clean(str)
+{
+    var sentence = str.replace(/\w\S*/g, function(txt){
+       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    return sentence.replace(/\s/g, '');
+}
+
+/*
+        == Password generator ==
+        Loops ten times using Base-64 hash, then
+        continually until password policy is satisfied.
+*/
+
+function gp2_generate_passwd(Passwd,Len) {
+
+        var i=0;
+        while(i<10||!(gp2_check_passwd(Passwd.substring(0,Len)))) {
+                Passwd=b64_sha512(Passwd);
+                i++;
+        }
+        return Passwd.substring(0,Len);
+}
+
+
+/*
+        == Password policy validator ==
+        Input must:
+        - Always start with a lowercase letter [a-z]
+        - Always contain at least one uppercase letter [A-Z]
+        - Always contain at least one numeral [0-9]
+*/
+
+function gp2_check_passwd(Passwd) {
+        return (Passwd.search(/[a-z]/)===0&&Passwd.search(/[0-9]/)>0&&Passwd.search(/[A-Z]/)>0)?true:false;
+}
+
+
+/*
+        == Hash generator ==
+        Loops four times using hexidecimal hash.
+*/
+
+function gp2_generate_hash(HashSeed) {
+        for(var i=0;i<=4;i++) {
+                HashSeed=hex_sha512(HashSeed);
+        }
+        return HashSeed;
+}
+
+
+/*
+	== Domain name isolator ==
+	Isolates the domain name or IP address using regular 
+	expressions. Respects a number of (hard-coded) 
+	secondary ccTLDs (e.g., "co.uk").
+*/
+
+function gp2_process_uri(URI) {
+
+        URI=URI.toLowerCase().replace(/\s/g, '');
+	var HostNameIsolator=new RegExp('^(http|https|ftp|ftps|webdav|gopher|rtsp|irc|nntp|pop|imap|smtp)://([^/:]+)');
+	var HostName=URI.match(HostNameIsolator);
+
+	if(HostName&&HostName[2]!=null) {
+		HostName=HostName[2];
+	} else {
+		HostNameIsolator=new RegExp('^([^/:]+)');
+		HostName=URI.match(HostNameIsolator);
+		HostName=(HostName[1]!=null)?HostName[1]:URI;
+	}
+
+	HostNameIsolator=new RegExp('^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$');
+	HostName=(HostName.match(HostNameIsolator))?[HostName]:HostName.split('.');
+
+	if(HostName[2]==null) {
+		URI=HostName.join('.');
+	} 
+
+	return URI;
+
+}
+
+
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -12,37 +163,11 @@
  * SHA-512 as an alternative. Unnecessary or unused functions are deleted.
  */
 
-function hex_hash(s) {
-	try { Method } catch(e) { Method='md5'; }
-	return (Method=='sha512')?hex_sha512(s):hex_md5(s);
-}
-
-function b64_hash(s) {
-	try { Method } catch(e) { Method='md5'; }
-	return (Method=='sha512')?b64_sha512(s):b64_md5(s);
-}
-
 /*
  * Configurable variables. You may need to tweak these to be compatible with
  * the server-side, but the defaults work in most cases.
  */
 var hexcase = 0;   /* hex output format. 0 - lowercase; 1 - uppercase        */
-//var b64pad  = "A";  /* base-64 pad character. "=" for strict RFC compliance   */
-
-/*
- * These are the functions you'll usually want to call
- * They take string arguments and return either hex or base-64 encoded strings
- */
-function hex_md5(s)    { return rstr2hex(rstr_md5(str2rstr_utf8(s))); }
-function b64_md5(s)    { return rstr2b64(rstr_md5(str2rstr_utf8(s))); }
-
-/*
- * Calculate the MD5 of a raw string
- */
-function rstr_md5(s)
-{
-  return binl2rstr(binl_md5(rstr2binl(s), s.length * 8));
-}
 
 /*
  * Convert a raw string to a hex string
