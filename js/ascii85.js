@@ -1,4 +1,3 @@
-
 (function(){
 	var c = function(input, length, result){
 		var i, j, n, b = [0, 0, 0, 0, 0];

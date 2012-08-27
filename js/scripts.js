@@ -1,8 +1,7 @@
-                        $(document).ready(function() {
-
-                                $('#inputUser').val('').trigger('change');
-
-                                $('#showPassword').on('click', function (event) {
+$(document).ready(function() {
+	$('#inputUser').val('').trigger('change');
+	
+	$('#showPassword').on('click', function (event) {
 
                                         var phrase=clean($('#inputPhrase').val());
 
@@ -66,6 +65,7 @@
 
                         });
 
+// Replace multiple spaces with a single space, change passphrase to Title Case
 function clean(str)
 {
     var sentence = str.replace(/\w\S*/g, function(txt){

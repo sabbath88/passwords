@@ -18,10 +18,10 @@ $( document ).ready( function() {
 	require( [ 'jquery-ui', 'bCrypt', 'ascii85' ], function() {
 
 		var bcrypt = new bCrypt(),
-                $output = $('#Output'),
-		$salt = $('#inputUser'),
-		$secret = $('#inputPassword'),
-		$passwd = $('#inputPhrase');
+            $output = $('#Output'),
+			$salt = $('#inputUser'),
+			$secret = $('#inputPassword'),
+			$passwd = $('#inputPhrase');
 			
 		function b85_hash ( s ) {
 			return dojox.encoding.ascii85.encode( $.map( b64_sha512( s ).split(''), function( val ) { return val.charCodeAt( 0 ); } ) );
@@ -42,7 +42,6 @@ $( document ).ready( function() {
                                $output.progressbar( 'destroy' );
                        }
                });
-
 		
 		$salt.on( 'change', function( e ) {
 		  $passwd.trigger( 'change' );
