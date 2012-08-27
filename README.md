@@ -3,8 +3,7 @@ Unique Passwords
 
 You can use the [password generator][1] to create strong but unique passwords for all your web accounts. It internally uses the bcrypt algorithm for hashing.
 
-How to Use
-----------
+###How to Use
 
 Go to [ctrlq.org/passwords][1] to test a live version of the password generator.
 
