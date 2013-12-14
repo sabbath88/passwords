@@ -29,13 +29,12 @@ You can also download the password generator for offline use. Just extract the z
 
 ### Credits
 
-* Twitter Bootstrap [https://twitter.github.com/bootstrap](https://twitter.github.com/bootstrap/)
 * SuperGenPass [https://github.com/cmcnulty/SuperGenPass](https://github.com/cmcnulty/SuperGenPass)
 * BCrypt [http://en.wikipedia.org/wiki/Bcrypt](http://en.wikipedia.org/wiki/Bcrypt)
 
 #### License
 
-Copyright 2012 Digital Inspiration
+Copyright 2012-2013 Digital Inspiration
 Licensed under the Apache License,
 Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 
