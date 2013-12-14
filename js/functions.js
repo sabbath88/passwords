@@ -1,4 +1,4 @@
-var $output, $user, $phrase, $domain, $length, $info;
+var $output, $user, $phrase, $domain, $length, $info, $help;
 
 $(document).ready(function () {
 
@@ -8,6 +8,7 @@ $(document).ready(function () {
     $domain = $('#inputDomain');
     $length = $('#inputLength');
     $info = $('#outputInfo');
+    $help = $('#info');
 
     if (localStorage["inputLength"]) {
         $('#inputLength').val(localStorage["inputLength"]);
@@ -29,10 +30,16 @@ $(document).ready(function () {
         return false;
     });
 
-    $("#modal-launcher, #modal-footer").click(function () {
-        $("#info").toggleClass("active");
+    $("#modal-launcher").click(function (e) {
+        $help.addClass("active");
+        e.preventDefault();
     });
 
+    $("#modal-footer").click(function (e) {
+        $help.removeClass("active");
+        e.preventDefault();
+    });
+    
     $('#showPassword').on('click', function (e) {
 
         var Phrase = clean($phrase.val());
