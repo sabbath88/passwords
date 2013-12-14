@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Generate Strong and Unique Passwords for Every Site - BCrypt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Amit Agarwal - www.labnol.org">
+    <meta name="description" content="Strong passwords contain a mix of numbers, digits and symbols and they are unique for every site. The online password generaator will create passwords that meet all the criteria using the most secure BCrypt algorithm.">
+    <link rel="alternate" type="application/rss+xml" title="Digital Inspiration" href="http://feeds.labnol.org/labnol" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="js/jquery.js"></script>
+    <script src="js/bcrypt.js"></script>
+    <script src="js/functions.js"></script>
+    <script src="js/typeahead.js"></script>
+</head>
+<body>
+    <div class="login">
+        <div class="login-screen">
+            <div class="app-title">
+                <h1>Secure Passwords</h1>
+            </div>
+            <div id="info">
+                <h2>Generate Strong, Secure and Unique Passwords</h2>
+                <p>The password generator uses the secure bcrypt algorithm to create strong passwords that are also unique for every site. You just have to remember a single passphrase (master password) and the tool will create different passwords for all your online accounts with a click.</p>
+                <h3>I need to change my password every month?</h3>
+                <p>Some sites requires you to change passwords every month. In that case, just append the month name to the passphrase and have unique passwords every month.</p>
+                <h3>Make it Portable with Dropbox</h3>
+                <p>You can download the password generator code from
+                    <a href="https://github.com/labnol/passwords/" target="_blank">Github</a> and run on a USB key. Or upload the file to Dropbox and access the tool from all your other computers.</p>
+                <h3>Are my passwords safe?</h3>
+                <p>The passwords are generated inside your web browser itself. None of your data is shared or uploaded and you can even use the tool in offline mode.</p>
+                <p class="credit">
+                    The tool was created by
+                    <a href="http://twitter.com/labnol" target="_blank">Amit Agarwal</a> for
+                    <a href="http://www.labnol.org/">Digital Inspiration</a> on August 28, 2012. Last updated on December 14, 2013.
+                </p>
+                <div class="control-group">
+                    <a class="btn btn-primary btn-large btn-block" href="#" id="modal-footer">hide help</a>
+                </div>
+            </div>
+
+            <div class="login-form">
+                <div class="control-group">
+                    <input autocorrect="off" spellcheck="false" type="text" class="login-field userInput notstored" value="" placeholder="username" id="inputUser">
+                    <label class="login-field-icon fui-user" for="login-name"></label>
+                </div>
+
+                <div class="control-group">
+                    <input autocorrect="off" spellcheck="false" type="text" class="login-field userInput typeahead notstored" value="" placeholder="web domain" id="inputDomain">
+                    <label class="login-field-icon fui-lock" for="login-pass"></label>
+                </div>
+
+                <div class="control-group">
+                    <input autocorrect="off" spellcheck="false" type="text" class="login-field userInput stored" value="" placeholder="password length" id="inputLength">
+                    <label class="login-field-icon fui-lock" for="login-pass"></label>
+                </div>
+
+                <div class="control-group">
+                    <input autocorrect="off" spellcheck="false" type="text" class="login-field userInput stored" value="" placeholder="secret key" id="inputPhrase">
+                    <label class="login-field-icon fui-lock" for="login-pass"></label>
+                </div>
+
+                <div class="control-group" id="outputInfo">
+                </div>
+
+                <div class="control-group">
+                    <a class="btn btn-primary btn-large btn-block" href="#" id="showPassword">show password</a>
+                </div>
+
+                <div class="control-group">
+                    <input autocorrect="off" spellcheck="false" style="display:none" type="text" class="login-field" value="" placeholder="your password" id="outputPassword">
+                </div>
+
+                <div class="control-group help">
+                    <a class="login-link left whatisthis" href="#" id="modal-launcher">help</a>
+                    <a class="login-link right deletecache" href="#">reset</a>
+                </div>
+
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>
