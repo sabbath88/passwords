@@ -1,5 +1,4 @@
-var bcrypt = new bCrypt(),
-    $output, $user, $phrase, $domain, $length, $info;
+var $output, $user, $phrase, $domain, $length, $info;
 
 $(document).ready(function () {
 
@@ -113,9 +112,12 @@ function generate_password(User, Domain, Phrase, Len) {
     Len = (Len < 4) ? 4 : (Len > 24) ? 24 : Len;
 
     $output.val("Computing..").show();
+    
     var salt = '$2a$10$' + hex_sha512(Domain + User + 'ed6abeb33d6191a6acdc7f55ea93e0e2').substr(0, 21) + '.';
 
     var key = Phrase + User + ":" + Domain;
+    
+    var bcrypt = new bCrypt(),
 
     bcrypt.hashpw(key, salt, function (result) {
 
