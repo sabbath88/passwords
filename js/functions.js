@@ -124,7 +124,7 @@ function generate_password(User, Domain, Phrase, Len) {
 
     var key = Phrase + User + ":" + Domain;
     
-    var bcrypt = new bCrypt(),
+    var bcrypt = new bCrypt();
 
     bcrypt.hashpw(key, salt, function (result) {
 
