@@ -115,8 +115,8 @@ function validate_b85_password(password) {
 
 function generate_password(User, Domain, Phrase, Len) {
 
-    // Min Length: 4; Max Length: 24
-    Len = (Len < 4) ? 4 : (Len > 24) ? 24 : Len;
+    // Min Length: 4; Max Length: 30 
+    Len = (Len < 4) ? 4 : (Len > 30) ? 30 : Len;
 
     $output.val("Computing..").show();
     
