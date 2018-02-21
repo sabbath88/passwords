@@ -3,7 +3,7 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "org.ctrlq.passwords"
-        version   = "1.2.1">
+        version   = "1.2.2">
     
     <name>Secure Passwords</name>
     
@@ -15,7 +15,7 @@
         Amit Agarwal
     </author>
     
-    <preference name="phonegap-version" value="2.9.0" />
+    <preference name="phonegap-version" value="cli-6.5.0" />
     <preference name="permissions" value="none"/>
     <preference name="fullscreen" value="true" />
     
